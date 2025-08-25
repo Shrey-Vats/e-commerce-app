@@ -7,6 +7,8 @@ declare module "next-auth" {
     name?: string;
     email?: string;
     password?: string;
+    image?: string;
+    roles: string;
     isVerified?: boolean;
     verifyToken?: String;
     verifyTokenExpiresAt?: DateTime;
@@ -18,6 +20,7 @@ declare module "next-auth" {
     user: {
       _id?: string;
       name?: string;
+      roles?: string;
       isVerified?: boolean;
     } & DefaultSession["user"]
   }
@@ -27,6 +30,16 @@ declare module "next-auth/jwt" {
   interface JWT {
     _id?: string;
     name?: string;
+    roles?: string;
     isVerified?: boolean;
   }
+}
+
+export interface product {
+  title: string;
+  description: string;
+  images: string;
+  slug: string;
+  price: number;
+  status: string;
 }
