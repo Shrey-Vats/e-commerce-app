@@ -5,9 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
-interface images {
-    images: {name: string, value: string}[];
-}
 export default function CreateProductPage() {
   const {
     register,
@@ -17,21 +14,20 @@ export default function CreateProductPage() {
   } = useForm<Product>({
     resolver: zodResolver(ProductSchema),
     defaultValues: {
-      images:[""],
+      images: [""],
     },
     mode: "onBlur",
     reValidateMode: "onBlur",
   });
 
-const { fields, append, remove } = useFieldArray<Product>({
-    name: "images" ,
-    control
-});
-
+  const { fields, append, remove } = useFieldArray({
+    name: "images",
+    control,
+  });
 
   const router = useRouter();
 
-  const onSumbit = async (data: Product) => {
+  const onSumbit: SubmitHandler<Product> = async (data) => {
     console.log(data);
     try {
       const response = await axios.post("http://localhost:3000/api/product/add", data);
@@ -50,8 +46,11 @@ const { fields, append, remove } = useFieldArray<Product>({
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-xl bg-white rounded-lg shadow-xl p-6 md:p-8">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Create Product</h1>
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          Create Product
+        </h1>
         <form onSubmit={handleSubmit(onSumbit)} className="space-y-5">
+          {/* Title */}
           <div>
             <input
               type="text"
@@ -59,9 +58,12 @@ const { fields, append, remove } = useFieldArray<Product>({
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
               placeholder="Title"
             />
-            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+            )}
           </div>
 
+          {/* Description */}
           <div>
             <textarea
               {...register("description")}
@@ -69,17 +71,25 @@ const { fields, append, remove } = useFieldArray<Product>({
               placeholder="Description"
               rows={4}
             />
-            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
+            {errors.description && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.description.message}
+              </p>
+            )}
           </div>
 
+          {/* Price (Float) */}
           <div>
             <input
               type="number"
-              {...register("price")}
+              step="0.01"
+              {...register("price", { valueAsNumber: true })}
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
               placeholder="Price"
             />
-            {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>}
+            {errors.price && (
+              <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>
+            )}
           </div>
 
           {/* Dynamic Images Field Array */}
@@ -98,8 +108,17 @@ const { fields, append, remove } = useFieldArray<Product>({
                   onClick={() => remove(index)}
                   className="p-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </button>
               </div>
@@ -113,11 +132,14 @@ const { fields, append, remove } = useFieldArray<Product>({
             </button>
             {errors.images && (
               <p className="text-red-500 text-sm mt-1">
-                {typeof errors.images.message === 'string' ? errors.images.message : 'Please check the image URLs.'}
+                {typeof errors.images.message === "string"
+                  ? errors.images.message
+                  : "Please check the image URLs."}
               </p>
             )}
           </div>
-          
+
+          {/* Category */}
           <div>
             <input
               type="text"
@@ -125,9 +147,14 @@ const { fields, append, remove } = useFieldArray<Product>({
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
               placeholder="Category ID"
             />
-            {errors.categoryId && <p className="text-red-500 text-sm mt-1">{errors.categoryId.message}</p>}
+            {errors.categoryId && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.categoryId.message}
+              </p>
+            )}
           </div>
-          
+
+          {/* Brand */}
           <div>
             <input
               type="text"
@@ -135,9 +162,14 @@ const { fields, append, remove } = useFieldArray<Product>({
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
               placeholder="Brand ID"
             />
-            {errors.brandId && <p className="text-red-500 text-sm mt-1">{errors.brandId.message}</p>}
+            {errors.brandId && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.brandId.message}
+              </p>
+            )}
           </div>
-          
+
+          {/* Submit */}
           <button
             type="submit"
             className="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"

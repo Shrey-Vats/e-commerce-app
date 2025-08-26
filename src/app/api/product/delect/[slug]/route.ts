@@ -4,8 +4,13 @@ import { prisma } from "@/lib/prisma";
 export async function DELETE(req: NextRequest, {params}: {params: {slug: string}}) {
   const productSlug = params.slug;
 
+  if(!productSlug) return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 });
+
   try {
-    await prisma.product.delete({ where: { slug: productSlug } });
+    const response = await prisma.product.delete({ where: { slug: productSlug } });
+
+    if(!response) return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 });
+    
     return NextResponse.json({ success: true, message: "Product deleted successfully" }, { status: 200 });
   } catch (error) {
     console.error("Error in /api/product/:slug:", error);

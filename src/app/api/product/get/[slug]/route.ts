@@ -6,6 +6,8 @@ export async function GET(
 ) {
   const productSlug = params.slug;
   console.log(productSlug);
+
+  if(!productSlug) return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 }); 
   try {
     const productInfo = await prisma.product.findUnique({
       where: { slug: productSlug },
@@ -17,7 +19,6 @@ export async function GET(
         { status: 404 }
       );
     }
-
     return NextResponse.json(
       { success: true, productInfo: productInfo },
       { status: 200 }
