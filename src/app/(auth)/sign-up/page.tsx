@@ -24,12 +24,14 @@ const page = () => {
   const debounced = useDebounceCallback(setEmail, 400);
   const router = useRouter();
 
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
   //zod implementation
 
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
     setIsSummiting(true);
     try {
-      const response = await axios.post<ApiResponse>("/api/sign-up", data);
+      const response = await axios.post<ApiResponse>(`${API_BASE_URL}/api/sign-up`, data);
       toast(response.data.message);
       router.push("/sign-in");
       setIsSummiting(false);

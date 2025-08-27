@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export async function PUT(
   req: NextRequest,
@@ -24,9 +25,26 @@ export async function PUT(
       );
     }
 
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { id } });
+    if (!existingUser) {
+      return NextResponse.json(
+        { success: false, message: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    const hashPassword = await bcrypt.hash(password, 10);
+
     const response = await prisma.user.update({
       where: { id },
-      data: { name, password,   roles: {
+      data: { name, password: hashPassword,   roles: {
       set: [roles],  // ✅ ensures it's stored as an array
     }, },
     });

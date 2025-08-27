@@ -5,11 +5,9 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
 
-    console.log(searchParams)
     const queryParams = {
       email: searchParams.get("email"),
     };
-    console.log(queryParams.email);
 
     if (!queryParams.email) {
       return NextResponse.json(
@@ -31,5 +29,8 @@ export async function GET(request: Request) {
       { success: false, message: "Email already exists", data: isExitingUser.email },
       { status: 400 }
     );
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error in /api/check-email:", error);
+    return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
+  }
 }

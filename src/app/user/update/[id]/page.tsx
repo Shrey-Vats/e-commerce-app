@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { motion } from "framer-motion";
@@ -22,9 +21,10 @@ type UpdateUser = z.infer<typeof updateUser>;
 const rolesOptions = ["ADMIN", "USER", "SELLER"] as const;
 
 export default function Page({ params }: { params: { id: string } }) {
- const paramss = useParams<{ id: string }>(); // ✅ type safe
-  const id = paramss.id;
+
+  const id = params.id;
   const [isUpdating, setUpdating] = useState(false);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
   const {
     register,
@@ -40,7 +40,7 @@ export default function Page({ params }: { params: { id: string } }) {
     setUpdating(true);
     try {
       const response = await axios.put(
-        `http://localhost:3000/api/users/update/${id}`,
+        `${API_BASE_URL}/api/users/update/${id}`,
         data
       );
       console.log("User updated:", response.data);

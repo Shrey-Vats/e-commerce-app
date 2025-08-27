@@ -9,7 +9,7 @@ declare module "next-auth" {
     email?: string;
     password?: string;
     image?: string;
-    roles: string;
+    roles: string[];
     isVerified?: boolean;
     verifyToken?: String;
     verifyTokenExpiresAt?: DateTime;

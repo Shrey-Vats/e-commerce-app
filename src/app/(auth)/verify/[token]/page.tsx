@@ -12,20 +12,23 @@ function page({ params }: { params: Promise<{ token: string }> }) {
   const [message, setMessage] = useState<string>("");
   const [currentState, setCurrentState] = useState<currentState>("loading");
   const { token } = use(params);
-
   const router = useRouter();
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
   useEffect(() => {
       const verifyToken = async () => {
     try {
       setCurrentState("loading");
       setMessage("Verifying...");
-      const response = await axios.get(`/api/verify-token?token=${token}`);
+      const response = await axios.get(`${API_BASE_URL}/api/verify-token?token=${token}`);
 
       if (!response.data.success) {
         setCurrentState("failed");
+        router.push("/sign-up");
         setMessage(response.data.message);
       } else {
         setCurrentState("success");
+        router.push("/sign-in");
         setMessage(response.data.message);
       }
     } catch (error) {

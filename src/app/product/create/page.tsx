@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 
 export default function CreateProductPage() {
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
   const {
     register,
     control,
@@ -30,7 +33,7 @@ export default function CreateProductPage() {
   const onSumbit: SubmitHandler<Product> = async (data) => {
     console.log(data);
     try {
-      const response = await axios.post("http://localhost:3000/api/product/add", data);
+      const response = await axios.post(`${API_BASE_URL}/api/product/add`, data);
       console.log(response);
 
       if (!response.data.success) {
