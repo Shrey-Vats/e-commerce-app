@@ -3,7 +3,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
-import {prisma} from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 interface Credentials {
   email: string;
   password: string;
@@ -19,21 +19,24 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: any): Promise<any> {
-       const {email , password} = credentials as Credentials;
+        const { email, password } = credentials as Credentials;
 
-       console.log(email, password)
+        console.log(email, password);
 
         try {
           const user = await prisma?.user.findUnique({
             where: { email },
           });
 
-          console.log(user)
+          console.log(user);
           if (!user) return null;
 
+          if (!user.password) {
+            return null;
+          }
           const isValidPassword = await bcrypt.compare(password, user.password);
 
-          console.log(isValidPassword)
+          console.log(isValidPassword);
           if (!isValidPassword) {
             return null;
           }
@@ -44,46 +47,47 @@ export const authOptions: NextAuthOptions = {
 
           return user;
         } catch (error) {
-          console.error(error)
+          console.error(error);
           return null;
         }
       },
     }),
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID as string,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET as string
+      clientSecret: process.env.AUTH_GOOGLE_SECRET as string,
     }),
     GithubProvider({
       clientId: process.env.AUTH_GITHUB_ID as string,
-      clientSecret: process.env.AUTH_GITHUB_SECRET as string
-    })
-    
+      clientSecret: process.env.AUTH_GITHUB_SECRET as string,
+    }),
   ],
   callbacks: {
     async session({ session, token }) {
-        if(token){
-          session.user._id = token._id;
-          session.user.isVerified = token.isVerified;
-          session.user.name = token.name;
-          session.user.roles = token.roles;
-        }
+      if (token) {
+        session.user._id = token._id;
+        session.user.id = token.id;
+        session.user.isVerified = token.isVerified;
+        session.user.name = token.name;
+        session.user.roles = token.roles;
+      }
       return session;
     },
     async jwt({ token, user }) {
-        if (user){
-            token._id = user._id?.toString();
-            token.isVerified = user.isVerified;
-            token.name = user.name;
-            token.roles = user.roles;
-        }
+      if (user) {
+        token._id = user._id?.toString();
+        token.id = user.id;
+        token.isVerified = user.isVerified;
+        token.name = user.name;
+        token.roles = user.roles;
+      }
       return token;
-    }
+    },
   },
   pages: {
-    signIn: "/sign-in"
+    signIn: "/sign-in",
   },
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
   },
-  secret: process.env.NEXTAUTH_SECRET
+  secret: process.env.NEXTAUTH_SECRET,
 };

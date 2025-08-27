@@ -21,7 +21,7 @@ import { fa } from "zod/v4/locales";
 const page = () => {
   const [isSummiting, setIsSummiting] = useState<boolean>(false);
 
-  const router = useRouter();
+  const router = useRouter(); 
 
   //zod implementation
 

@@ -1,13 +1,26 @@
 "use client"
 import type {product} from "@/types/next-auth";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 export default function Home ({products}: {products: product[]}) {
   const router = useRouter();
+  const { data: session } = useSession();
+
+  // if (!session?.user._id) {
+  //   router.push("/sign-in");
+  // }
+  console.log(session);
 
   return (
 <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900">
   <div className="max-w-7xl mx-auto px-6 py-10">
     {/* Heading */}
+<div className="w-full h-auto flex justify-between">
+      <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" onClick={() => signOut()}>Log Out</button>
+
+      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" className="h-10 w-10 cursor-pointer hover:drop-shadow-md transition-shadow animate-bounce rounded-full" onClick={() => router.push(`/users/${session?.user.email}`)}/>
+</div>
     <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
       Featured Products
     </h2>

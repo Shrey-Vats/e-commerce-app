@@ -18,9 +18,9 @@ model User {
   id                   String       @id @default(auto()) @map("_id") @db.ObjectId
   name                 String?
   email                String       @unique
-  password             String
+  password             String?
   image                String?
-  roles                Role[]
+  roles                Role[]       @default([USER])
   status               UserStatus   @default(ACTIVE)
   addresses            Address[]
   // carts                Cart[]
@@ -29,9 +29,9 @@ model User {
   // reviews              Review[]
   provider             AuthProvider @default(CREDENTIALS)
   isVerified           Boolean      @default(false)
-  verifyToken          String?      @unique
+  verifyToken          String?      
   verifyTokenExpiresAt DateTime?
-  resetToken           String?      @unique
+  resetToken           String?  
   resetTokenExpiresAt  DateTime?
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt

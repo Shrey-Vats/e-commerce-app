@@ -16,8 +16,11 @@ export async function GET(request: Request) {
       )
     }
 
-    const user = await prisma.user.findUnique({
-      where: {  verifyToken: token, verifyTokenExpiresAt: { gt: new Date() } },
+    const user = await prisma.user.findFirst({
+      where: {
+        verifyToken: token,
+        verifyTokenExpiresAt: { gt: new Date() }
+      },
     });
 
     if (!user) {

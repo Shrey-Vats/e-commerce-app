@@ -15,7 +15,6 @@ export async function generateStaticParams() {
 }
 
 
-
 export default async function ProductPage({ params }: {params: {slug: string}}){
 
    const paramsSlug = params.slug;

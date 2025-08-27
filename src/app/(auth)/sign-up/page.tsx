@@ -1,10 +1,10 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useDebounceValue, useDebounceCallback } from "usehooks-ts";
+import { useDebounceCallback } from "usehooks-ts";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { signUpSchema } from "@/Schema/signUpSchema";

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-export async function DELETE(req: NextRequest, {params}: {params: {slug: string}}) {
+import { paramsSlug } from "@/types/types";
+export async function DELETE(req: NextRequest, {params}: paramsSlug) {
   const productSlug = params.slug;
 
   if(!productSlug) return NextResponse.json({ success: false, message: "Product not found" }, { status: 404 });
