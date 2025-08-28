@@ -109,7 +109,7 @@ model Product {
   price         Float          @default(0)
   discountPrice Float?
   currency      String         @default("INR")
-  sku           String         @unique
+  sku           String?         @unique
   stock         Int            @default(0)
   minStock      Int            @default(5)
   variants      Variant[]
