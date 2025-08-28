@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse, NextRequest } from "next/server";
 import bcrypt from "bcryptjs";
-import { signUpSchema } from "@/Schema/signUpSchema";
+import { signUpSchema } from "@/Schemas/signUpSchema";
 import { sendVerificationEmail } from "@/utils/SendVerificationEmail";
 
 export async function POST(request: NextRequest) {

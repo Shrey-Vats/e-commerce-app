@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { signUpSchema } from "@/Schema/signUpSchema";
+import { signUpSchema } from "@/Schemas/signUpSchema";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/types/ApiResponse";
 import { FcGoogle } from "react-icons/fc";

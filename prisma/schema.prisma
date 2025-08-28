@@ -1,9 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// Enhanced Prisma schema for complete e-commerce functionality
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -20,13 +15,14 @@ model User {
   email                String       @unique
   password             String?
   image                String?
+  phone                String?
   roles                Role[]       @default([USER])
   status               UserStatus   @default(ACTIVE)
   addresses            Address[]
-  // carts                Cart[]
-  // orders               Orders[]
-  // wishlists            Wishlist?
-  // reviews              Review[]
+  carts                Cart?
+  orders               Order[]
+  wishlists            Wishlist[]
+  reviews              Review[]
   provider             AuthProvider @default(CREDENTIALS)
   isVerified           Boolean      @default(false)
   verifyToken          String?      
@@ -59,7 +55,7 @@ enum Role {
 model Address {
   id        String  @id @default(auto()) @map("_id") @db.ObjectId
   userId    String  @db.ObjectId
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   label     String
   name      String
   phone     String
@@ -70,44 +66,238 @@ model Address {
   country   String
   zip       String
   isDefault Boolean @default(false)
-}
-
-model Category {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  slug      String   @unique
-  parentId  String?  @db.ObjectId
+  orders    Order[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model Category {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  slug      String    @unique
+  image     String?
+  parentId  String?   @db.ObjectId
+  parent    Category? @relation("CategoryTree", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children  Category[] @relation("CategoryTree")
+  products  Product[]
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
 model Brand {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
-  name String @unique
-  slug String @unique
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String    @unique
+  slug      String    @unique
+  logo      String?
+  products  Product[]
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Product {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
   title         String
-  slug          String    @unique
+  slug          String         @unique
   description   String
   images        String[]
-  categoryId    String?  /* {/* @db.ObjectId */
-  brandId       String?   /* @db.ObjectId */
-  price         Float      @default(0)
-  currency      String     @default("INR")
-  // varients      Varient[]
+  categoryId    String         @db.ObjectId
+  category      Category       @relation(fields: [categoryId], references: [id])
+  brandId       String         @db.ObjectId
+  brand         Brand          @relation(fields: [brandId], references: [id])
+  price         Float          @default(0)
+  discountPrice Float?
+  currency      String         @default("INR")
+  sku           String         @unique
+  stock         Int            @default(0)
+  minStock      Int            @default(5)
+  variants      Variant[]
   attributes    Json?
-  status        ProductStatus @default(PUBLISHED)
-  avgRating     Float?       @default(0)
-  reviewCount   Int?      @default(0)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  tags          String[]
+  status        ProductStatus  @default(PUBLISHED)
+  avgRating     Float?         @default(0)
+  reviewCount   Int            @default(0)
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  wishlists     Wishlist[]
+  reviews       Review[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([status])
+}
+
+model Variant {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  productId   String     @db.ObjectId
+  product     Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String     // e.g., "Size", "Color"
+  value       String     // e.g., "Large", "Red"
+  price       Float?     // Additional price for this variant
+  stock       Int        @default(0)
+  sku         String     @unique
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([productId, name, value])
 }
 
 enum ProductStatus {
   PUBLISHED
   DRAFT
   ARCHIVED
+  OUT_OF_STOCK
+}
+
+model Cart {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String     @unique @db.ObjectId
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  cartId    String   @db.ObjectId
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String   @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id])
+  variantId String?  @db.ObjectId
+  variant   Variant? @relation(fields: [variantId], references: [id])
+  quantity  Int      @default(1)
+  price     Float    // Store price at time of adding to cart
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId, variantId])
+}
+
+model Order {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  orderNumber   String      @unique
+  userId        String      @db.ObjectId
+  user          User        @relation(fields: [userId], references: [id])
+  items         OrderItem[]
+  status        OrderStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentMethod String?
+  subtotal      Float
+  tax           Float       @default(0)
+  shipping      Float       @default(0)
+  discount      Float       @default(0)
+  total         Float
+  currency      String      @default("INR")
+  
+  // Shipping Address
+  shippingAddressId String?  @db.ObjectId
+  shippingAddress   Address? @relation(fields: [shippingAddressId], references: [id])
+  
+  // Billing Address (stored as embedded document)
+  billingAddress Json?
+  
+  notes         String?
+  trackingId    String?
+  estimatedDelivery DateTime?
+  deliveredAt   DateTime?
+  cancelledAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String   @db.ObjectId
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String   @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id])
+  variantId String?  @db.ObjectId
+  variant   Variant? @relation(fields: [variantId], references: [id])
+  quantity  Int
+  price     Float    // Price at time of order
+  createdAt DateTime @default(now())
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+model Wishlist {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String  @db.ObjectId
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model Review {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String   @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating    Int      // 1-5
+  comment   String?
+  images    String[] // Review images
+  verified  Boolean  @default(false) // Verified purchase
+  helpful   Int      @default(0) // Helpful votes count
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([rating])
+}
+
+model Coupon {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  code        String    
+  description String?
+  type        CouponType @default(PERCENTAGE)
+  value       Float      // Percentage or fixed amount
+  minAmount   Float?     // Minimum order amount
+  maxDiscount Float?     // Maximum discount amount
+  usageLimit  Int?       // Total usage limit
+  usageCount  Int        @default(0)
+  userLimit   Int?       // Per user limit
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+  FREE_SHIPPING
 }

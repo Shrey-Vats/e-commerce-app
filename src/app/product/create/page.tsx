@@ -1,6 +1,6 @@
 "use client";
 import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
-import { ProductSchema, type Product } from "@/Schema/ProductSchema";
+import { ProductSchema, type Product } from "@/Schemas/ProductSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import axios from "axios";
