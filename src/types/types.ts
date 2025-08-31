@@ -24,3 +24,40 @@ export interface userAdmin {
   createdAt: string;
   roles: Role[];  
 }
+
+export interface SignInFormData {
+  email: string;
+  password: string;
+  remember: boolean;
+}
+
+export interface SignUpFormData {
+  firstName: string;
+  lastName: string;
+  signupEmail: string;
+  phone: string;
+  signupPassword: string;
+  confirmPassword: string;
+}
+
+export interface product {
+  title: string;
+  id: string;
+  description: string;
+  images: string[];
+  slug: string;
+  price: number;
+  originalPrice: number  | null;
+}
+
+export interface productsInfo {
+  title: string;
+  id: string;
+  description: string;
+  inStock: boolean;
+  images: string[];
+  slug: string;
+  price: number;
+  originalPrice: number  | null;
+}
+

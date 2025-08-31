@@ -107,7 +107,7 @@ model Product {
   brandId       String         @db.ObjectId
   brand         Brand          @relation(fields: [brandId], references: [id])
   price         Float          @default(0)
-  discountPrice Float?
+  originalPrice Float?
   currency      String         @default("INR")
   sku           String?         @unique
   stock         Int            @default(0)

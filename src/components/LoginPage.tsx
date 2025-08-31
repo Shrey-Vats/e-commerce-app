@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -7,6 +8,17 @@ import { Label } from './ui/label';
 import { Separator } from './ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Checkbox } from './ui/checkbox';
+import axios from 'axios';
+import { signIn } from 'next-auth/react';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { signUpSchema } from '@/Schemas/signUpSchema';
+import { signInSchema } from '@/Schemas/signInSchema';
+// Updated schemas to match the new structure
+
+
+type SignInFormData = z.infer<typeof signInSchema>;
+type SignUpFormData = z.infer<typeof signUpSchema>;
 
 interface LoginPageProps {
   onPageChange: (page: string) => void;
@@ -15,6 +27,65 @@ interface LoginPageProps {
 export default function LoginPage({ onPageChange }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  
+  // Sign In Form
+  const {
+    register: registerSignIn,
+    handleSubmit: handleSignInSubmit,
+    formState: { errors: signInErrors, isSubmitting: isSignInSubmitting },
+  } = useForm<SignInFormData>({
+    resolver: zodResolver(signInSchema),
+    mode: 'onChange',
+  });
+
+  // Sign Up Form
+  const {
+    register: registerSignUp,
+    handleSubmit: handleSignUpSubmit,
+    formState: { errors: signUpErrors, isSubmitting: isSignUpSubmitting },
+    watch: watchSignUp,
+  } = useForm<SignUpFormData>({
+    mode: 'onChange',
+    resolver: zodResolver(signUpSchema),
+  });
+
+  const signupPassword = watchSignUp('password');
+
+  const onSignInSubmit = async (data: SignInFormData) => {
+    console.log('Sign In Data:', data);
+
+    const result = await signIn('credentials', {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      console.log('Sign In Error:', result.error);
+    } else {
+      console.log('Sign In Success:', result);
+      onPageChange('');
+    }
+  };
+
+  const onSignUpSubmit = async (data: SignUpFormData) => {
+    console.log('Sign Up Data:', data);
+    
+    try {
+      // Remove confirmPassword from the data sent to API
+      const { confirmPassword, ...signUpData } = data;
+      const response = await axios.post(`${API_BASE_URL}/api/sign-up`, signUpData);
+
+      if (!response.data.success) {
+        signUpErrors.root = response.data.message;
+        console.log(response.data.message);
+      } 
+    } catch (error) {
+      console.error('Sign up error:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -57,8 +128,12 @@ export default function LoginPage({ onPageChange }: LoginPageProps) {
                       id="email"
                       type="email"
                       placeholder="john@example.com"
-                      required
+                      className={`mt-2 ${signInErrors.email ? 'border-red-500' : ''}`}
+                      {...registerSignIn('email')}
                     />
+                    {signInErrors.email && (
+                      <p className="text-red-500 text-sm mt-1">{signInErrors.email.message}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -68,7 +143,8 @@ export default function LoginPage({ onPageChange }: LoginPageProps) {
                         id="password"
                         type={showPassword ? 'text' : 'password'}
                         placeholder="Enter your password"
-                        required
+                        className={`mt-2 pr-10 ${signInErrors.password ? 'border-red-500' : ''}`}
+                        {...registerSignIn('password')}
                       />
                       <Button
                         type="button"
@@ -84,11 +160,16 @@ export default function LoginPage({ onPageChange }: LoginPageProps) {
                         )}
                       </Button>
                     </div>
+                    {signInErrors.password && (
+                      <p className="text-red-500 text-sm mt-1">{signInErrors.password.message}</p>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Checkbox id="remember" />
+                      <Checkbox 
+                        id="remember" 
+                      />
                       <Label htmlFor="remember" className="text-sm">
                         Remember me
                       </Label>
@@ -99,11 +180,12 @@ export default function LoginPage({ onPageChange }: LoginPageProps) {
                   </div>
 
                   <Button 
+                    onClick={handleSignInSubmit(onSignInSubmit)}
                     className="w-full" 
                     size="lg"
-                    onClick={() => onPageChange('home')}
+                    disabled={isSignInSubmitting}
                   >
-                    Sign In
+                    {isSignInSubmitting ? 'Signing In...' : 'Sign In'}
                   </Button>
                 </div>
 
@@ -136,23 +218,17 @@ export default function LoginPage({ onPageChange }: LoginPageProps) {
               {/* Sign Up Tab */}
               <TabsContent value="signup" className="space-y-4 mt-6">
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input
-                        id="firstName"
-                        placeholder="John"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        placeholder="Doe"
-                        required
-                      />
-                    </div>
+                  <div>
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="John Doe"
+                      className={`mt-2 ${signUpErrors.name ? 'border-red-500' : ''}`}
+                      {...registerSignUp('name')}
+                    />
+                    {signUpErrors.name && (
+                      <p className="text-red-500 text-sm mt-1">{signUpErrors.name.message}</p>
+                    )}
                   </div>
 
                   <div>
@@ -161,18 +237,12 @@ export default function LoginPage({ onPageChange }: LoginPageProps) {
                       id="signupEmail"
                       type="email"
                       placeholder="john@example.com"
-                      required
+                      className={`mt-2 ${signUpErrors.email ? 'border-red-500' : ''}`}
+                      {...registerSignUp('email')}
                     />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="+1 (555) 123-4567"
-                      required
-                    />
+                    {signUpErrors.email && (
+                      <p className="text-red-500 text-sm mt-1">{signUpErrors.email.message}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -180,24 +250,28 @@ export default function LoginPage({ onPageChange }: LoginPageProps) {
                     <div className="relative">
                       <Input
                         id="signupPassword"
-                        type={showPassword ? 'text' : 'password'}
+                        type={showSignupPassword ? 'text' : 'password'}
                         placeholder="Create a strong password"
-                        required
+                        className={`mt-2 pr-10 ${signUpErrors.password ? 'border-red-500' : ''}`}
+                        {...registerSignUp('password')}
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
                         className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                        onClick={() => setShowPassword(!showPassword)}
+                        onClick={() => setShowSignupPassword(!showSignupPassword)}
                       >
-                        {showPassword ? (
+                        {showSignupPassword ? (
                           <EyeOff className="h-4 w-4" />
                         ) : (
                           <Eye className="h-4 w-4" />
                         )}
                       </Button>
                     </div>
+                    {signUpErrors.password && (
+                      <p className="text-red-500 text-sm mt-1">{signUpErrors.password.message}</p>
+                    )}
                   </div>
 
                   <div>
@@ -207,7 +281,8 @@ export default function LoginPage({ onPageChange }: LoginPageProps) {
                         id="confirmPassword"
                         type={showConfirmPassword ? 'text' : 'password'}
                         placeholder="Confirm your password"
-                        required
+                        className={`mt-2 pr-10 ${signUpErrors.confirmPassword ? 'border-red-500' : ''}`}
+                        {...registerSignUp('confirmPassword')}
                       />
                       <Button
                         type="button"
@@ -223,35 +298,48 @@ export default function LoginPage({ onPageChange }: LoginPageProps) {
                         )}
                       </Button>
                     </div>
+                    {signUpErrors.confirmPassword && (
+                      <p className="text-red-500 text-sm mt-1">{signUpErrors.confirmPassword.message}</p>
+                    )}
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="terms" />
-                    <Label htmlFor="terms" className="text-sm">
-                      I agree to the{' '}
-                      <Button variant="link" className="p-0 h-auto text-sm text-primary">
-                        Terms & Conditions
-                      </Button>{' '}
-                      and{' '}
-                      <Button variant="link" className="p-0 h-auto text-sm text-primary">
-                        Privacy Policy
-                      </Button>
-                    </Label>
-                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-2">
+                      <Checkbox 
+                        id="terms" 
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor="terms" className="text-sm">
+                          I agree to the{' '}
+                          <Button variant="link" className="p-0 h-auto text-sm text-primary">
+                            Terms & Conditions
+                          </Button>{' '}
+                          and{' '}
+                          <Button variant="link" className="p-0 h-auto text-sm text-primary">
+                            Privacy Policy
+                          </Button>
+                        </Label>
+                      </div>
+                    </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="newsletter" />
-                    <Label htmlFor="newsletter" className="text-sm">
-                      Subscribe to our newsletter for deals and updates
-                    </Label>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="newsletter" 
+                      />
+                      <Label htmlFor="newsletter" className="text-sm">
+                        Subscribe to our newsletter for deals and updates
+                      </Label>
+                    </div>
                   </div>
 
                   <Button 
+                    onClick={handleSignUpSubmit(onSignUpSubmit)}
                     className="w-full" 
                     size="lg"
-                    onClick={() => onPageChange('home')}
+                    disabled={isSignUpSubmitting}
                   >
-                    Create Account
+                    {isSignUpSubmitting ? 'Creating Account...' : 'Create Account'}
                   </Button>
                 </div>
 

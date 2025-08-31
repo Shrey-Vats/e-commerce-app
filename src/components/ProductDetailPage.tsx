@@ -9,7 +9,7 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 
 interface ProductDetailPageProps {
   productId?: string;
-  onPageChange: (page: string) => void;
+  onPageChange: (page: string, productId?: string) => void;
 }
 
 export default function ProductDetailPage({ productId, onPageChange }: ProductDetailPageProps) {
@@ -62,20 +62,20 @@ export default function ProductDetailPage({ productId, onPageChange }: ProductDe
       'https://images.unsplash.com/photo-1646451403191-0d763de28fc2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmbG91ciUyMHByb2R1Y3QlMjBncm9jZXJ5fGVufDF8fHx8MTc1NjQ2Nzc2OXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
       'https://images.unsplash.com/photo-1691482995300-b57fef9fa0ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYWtpbmclMjBmbG91ciUyMHBhY2thZ2V8ZW58MXx8fHwxNzU2NDY3NzcyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
     ],
-    categories: ['Fruits', 'Hoodies', 'Juice', 'snacks', 'Tshirts'],
-    inStock: true,
-    organic: true,
+    // categories: ['Fruits', 'Hoodies', 'Juice', 'snacks', 'Tshirts'],
+    // inStock: true,
+    // organic: true,
     sku: 'MB3442',
     weight: '5 lbs',
-    soldInLastHour: 100,
-    lastSoldTime: 35,
-    nutritionFacts: {
-      calories: '364 per 100g',
-      protein: '13.2g',
-      carbs: '72.0g',
-      fiber: '10.7g',
-      sugar: '0.4g',
-    },
+    // soldInLastHour: 100,
+    // lastSoldTime: 35,
+    // nutritionFacts: {
+    //   calories: '364 per 100g',
+    //   protein: '13.2g',
+    //   carbs: '72.0g',
+    //   fiber: '10.7g',
+    //   sugar: '0.4g',
+    // },
   };
 
   const relatedProducts = [
@@ -209,7 +209,7 @@ export default function ProductDetailPage({ productId, onPageChange }: ProductDe
         {/* Price */}
         <div className="flex items-end space-x-2 mb-6">
           <span className="text-3xl font-bold text-gray-900">${product.price}</span>
-          <span className="text-lg text-gray-500 line-through">${product.oldPrice}</span>
+          <span className="text-lg text-gray-500 line-through">${product.originalPrice}</span>
         </div>
 
         {/* Action Buttons */}
@@ -240,12 +240,12 @@ export default function ProductDetailPage({ productId, onPageChange }: ProductDe
         </div>
 
         {/* Availability */}
-        <div className="flex items-center mb-6 text-sm">
+        {/* <div className="flex items-center mb-6 text-sm">
           <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
           <span className="text-gray-700">
             {product.soldInLastHour} sold in last {product.lastSoldTime} hour
           </span>
-        </div>
+        </div> */}
 
         {/* Details */}
         <div className="space-y-2 mb-6 text-sm text-gray-700">
@@ -253,10 +253,10 @@ export default function ProductDetailPage({ productId, onPageChange }: ProductDe
             <span className="font-medium">SKU: </span>
             {product.sku}
           </div>
-          <div>
+          {/* <div>
             <span className="font-medium">Categories: </span>
             {product.categories.join(", ")}
-          </div>
+          </div> */}
         </div>
 
         {/* Description */}
@@ -288,12 +288,12 @@ export default function ProductDetailPage({ productId, onPageChange }: ProductDe
                 <CardContent className="p-6">
                   <h3 className="font-semibold mb-4">Nutrition Facts per 100g</h3>
                   <div className="space-y-2">
-                    {Object.entries(product.nutritionFacts).map(([key, value]) => (
+                    {/* {Object.entries(product.nutritionFacts).map(([key, value]) => (
                       <div key={key} className="flex justify-between">
                         <span className="capitalize text-gray-600">{key}:</span>
                         <span className="font-medium">{value}</span>
                       </div>
-                    ))}
+                    ))} */}
                   </div>
                 </CardContent>
               </Card>

@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       categoryId,
       brandId,
       price,
-      discountPrice,
+      originalPrice,
       stock,
       variants,
       tags,
@@ -36,6 +36,8 @@ export async function POST(request: NextRequest) {
 
     const slug = title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
     const sku = `SKU-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    const orginalp = Number(originalPrice)
 
     const product = await prisma.product.create({
       data: {
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest) {
         categoryId,
         brandId,
         price,
-        discountPrice,
+        originalPrice: orginalp,
         sku,
         stock,
         tags: tags || [],

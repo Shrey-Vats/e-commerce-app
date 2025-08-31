@@ -1,10 +1,13 @@
-import Home from "./ProductsClient";
+import HomePage from "@/components/HomePage";
+import { product } from "@/types/types";
+import { prisma } from "@/lib/prisma";
+export default async function Page() {
+ try {
+        const products = await prisma.product.findMany()
 
-export default async function Page () {
+         return <HomePage products={products} />;
+    } catch (error) {
+        console.error("Error fetching products:", error);
+    }
 
-    const response = await fetch("http://localhost:3000/api/product", {cache: "no-store"})
-    const products = await response.json();
-    const productsInfo = products.productsInfo;
-
-   return <Home products={productsInfo} />;
 }

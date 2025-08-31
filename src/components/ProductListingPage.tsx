@@ -8,12 +8,14 @@ import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { Slider } from './ui/slider';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { productsInfo } from '@/types/types';
 
 interface ProductListingPageProps {
   onPageChange: (page: string, productId?: string) => void;
+  products: productsInfo[]
 }
 
-export default function ProductListingPage({ onPageChange }: ProductListingPageProps) {
+export default function ProductListingPage({ onPageChange, products }: ProductListingPageProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [priceRange, setPriceRange] = useState([0, 100]);
 
@@ -28,74 +30,7 @@ export default function ProductListingPage({ onPageChange }: ProductListingPageP
     'Frozen Foods'
   ];
 
-  const products = [
-    {
-      id: '1',
-      name: 'Organic Beetroot',
-      subtitle: 'Fresh from local farm',
-      price: 17.29,
-      originalPrice: 19.99,
-      rating: 4.5,
-      reviews: 124,
-      image: 'https://images.unsplash.com/photo-1657288089316-c0350003ca49?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmcmVzaCUyMHZlZ2V0YWJsZXMlMjBvcmdhbmljfGVufDF8fHx8MTc1NjQyMTUxM3ww&ixlib=rb-4.1.0&q=80&w=1080',
-      category: 'Vegetables',
-      inStock: true,
-      organic: true,
-    },
-    {
-      id: '2',
-      name: 'Premium Avocado',
-      subtitle: 'Imported from Italy',
-      price: 12.29,
-      originalPrice: 15.99,
-      rating: 4.8,
-      reviews: 89,
-      image: 'https://images.unsplash.com/photo-1725208961314-a437674fe5b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmcmVzaCUyMGZydWl0cyUyMGdyb2Nlcnl8ZW58MXx8fHwxNzU2NDY2NjA0fDA&ixlib=rb-4.1.0&q=80&w=1080',
-      category: 'Fruits',
-      inStock: true,
-      organic: true,
-    },
-    {
-      id: '3',
-      name: 'Canned Spam',
-      subtitle: 'Ready to eat',
-      price: 14.29,
-      originalPrice: 16.99,
-      rating: 4.2,
-      reviews: 56,
-      image: 'https://images.unsplash.com/photo-1608494132127-cfadf11a3889?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncm9jZXJ5JTIwc3RvcmUlMjBwcm9kdWN0c3xlbnwxfHx8fDE3NTY0MTYxMTR8MA&ixlib=rb-4.1.0&q=80&w=1080',
-      category: 'Snacks',
-      inStock: true,
-      organic: false,
-    },
-    {
-      id: '4',
-      name: 'Fresh Beef Mix',
-      subtitle: 'Cut with bone',
-      price: 16.29,
-      originalPrice: 18.99,
-      rating: 4.6,
-      reviews: 73,
-      image: 'https://images.unsplash.com/photo-1722581248341-de9b34c116bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWF0JTIwcHJvZHVjdHMlMjBncm9jZXJ5fGVufDF8fHx8MTc1NjQ2NjYwOXww&ixlib=rb-4.1.0&q=80&w=1080',
-      category: 'Meat & Fish',
-      inStock: true,
-      organic: false,
-    },
-    {
-      id: '5',
-      name: 'Fresh Milk',
-      subtitle: 'Organic dairy',
-      price: 18.29,
-      originalPrice: 20.99,
-      rating: 4.4,
-      reviews: 156,
-      image: 'https://images.unsplash.com/photo-1621458472871-d8b6a409aba1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkYWlyeSUyMHByb2R1Y3RzJTIwbWlsa3xlbnwxfHx8fDE3NTY0MjgxMjR8MA&ixlib=rb-4.1.0&q=80&w=1080',
-      category: 'Dairy',
-      inStock: false,
-      organic: true,
-    },
-  ];
-
+  
   const ProductCard = ({ product }: { product: typeof products[0] }) => (
     <Card 
       className="cursor-pointer hover:shadow-lg transition-shadow"
@@ -105,8 +40,8 @@ export default function ProductListingPage({ onPageChange }: ProductListingPageP
         <div className="relative">
           <div className="aspect-square mb-3 bg-gray-100 rounded-lg overflow-hidden">
             <ImageWithFallback
-              src={product.image}
-              alt={product.name}
+              src={product.images[0]}
+              alt={product.title}
               className="w-full h-full object-cover"
             />
           </div>
@@ -121,11 +56,11 @@ export default function ProductListingPage({ onPageChange }: ProductListingPageP
           >
             <Heart className="h-4 w-4" />
           </Button>
-          {product.organic && (
+          {/* {product.organic && (
             <Badge className="absolute top-2 left-2 bg-green-500 text-white">
               Organic
             </Badge>
-          )}
+          )} */}
           {!product.inStock && (
             <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
               <Badge variant="destructive">Out of Stock</Badge>
@@ -133,15 +68,15 @@ export default function ProductListingPage({ onPageChange }: ProductListingPageP
           )}
         </div>
         
-        <h3 className="font-medium mb-1">{product.name}</h3>
-        <p className="text-sm text-gray-600 mb-2">{product.subtitle}</p>
+        <h3 className="font-medium mb-1">{product.title}</h3>
+        <p className="text-sm text-gray-600 mb-2">{product.description}</p>
         
         <div className="flex items-center mb-2">
           <div className="flex items-center text-yellow-400">
-            {'★'.repeat(Math.floor(product.rating))}
-            {'☆'.repeat(5 - Math.floor(product.rating))}
+            {/* {'★'.repeat(Math.floor(product.rating))}
+            {'☆'.repeat(5 - Math.floor(product.rating))} */}
           </div>
-          <span className="text-sm text-gray-600 ml-2">({product.reviews})</span>
+          <span className="text-sm text-gray-600 ml-2">{/*({product.reviews})*/}</span>
         </div>
         
         <div className="flex items-center justify-between mb-3">
@@ -152,7 +87,7 @@ export default function ProductListingPage({ onPageChange }: ProductListingPageP
             </span>
           </div>
           <Badge variant="secondary" className="bg-green-100 text-green-800">
-            {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+           {Math.round(((product.originalPrice ?? product.price) / (product.originalPrice ?? product.price)) * 100)}% OFF
           </Badge>
         </div>
         
