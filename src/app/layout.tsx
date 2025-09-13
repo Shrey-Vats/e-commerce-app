@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import {Lato, Josefin_Sans} from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
-import { Toaster } from "@/components/ui/sonner"
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const lato = Lato({
   subsets: ["latin"],
-});
+  weight: ["100", "300", "400", "700", "900"],
+  style: ["normal", "italic"],
+  variable: "--font-lato",
+})
+
+const josefin = Josefin_Sans({
+  subsets: ["latin"],
+  weight: ["100", "300", "400", "700", "200", "600", "500"],
+  style: ["normal", "italic"],
+  variable: "--font-josefin",
+})
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -27,10 +31,10 @@ export default function RootLayout({
     <html lang="en">
       <AuthProvider>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${lato.className} ${josefin.className} antialiased bg-neutral-100`}
         >
           {children}
-          <Toaster />
+
         </body>
       </AuthProvider>
     </html>

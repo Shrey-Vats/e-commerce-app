@@ -1,13 +1,14 @@
-import HomePage from "@/components/HomePage";
-import { product } from "@/types/types";
+import HeroSection from "@/components/HeroSection";
+import Navbar from "@/layout/Navbar";
 import { prisma } from "@/lib/prisma";
-export default async function Page() {
- try {
-        const products = await prisma.product.findMany()
 
-         return <HomePage products={products} />;
-    } catch (error) {
-        console.error("Error fetching products:", error);
-    }
+export default async function Page() {
+
+    return (
+        <div className="">
+            <Navbar />
+            <HeroSection />
+        </div>
+    )
 
 }
